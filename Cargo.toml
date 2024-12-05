@@ -1,0 +1,10 @@
+[package]
+name = "netstate"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.94"
+clap = { version = "4.5.22", features = ["derive"] }
+is_executable = "1.0.4"
+xdg = "2.5.2"
+zbus = "5.1.1"
