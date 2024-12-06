@@ -1,6 +1,6 @@
 # `netstate(1)`
 
-Run hooks on network state change under `systemd-networkd`.
+Run hooks on network state changes under `systemd-networkd`.
 
 
 ## Quickstart

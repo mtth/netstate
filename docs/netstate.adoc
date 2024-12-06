@@ -10,7 +10,7 @@ v{manversion}
 
 == Name
 
-netstate - run hooks automatically on network state change for systems using systemd-networkd
+netstate - run hooks automatically on network state changes for systems using systemd-networkd
 
 
 == Synopsis
@@ -33,26 +33,62 @@ Prints the current network state (`online` or `offline`).
 
 *watch*::
 Runs the *netstate* service and executes hooks on network connectivity state change.
-Hooks are executable files in _$XDG_DATA_HOME/netstate/_.
+Hooks are executable files in _$XDG_DATA_HOME/netstate/hooks.d_.
 If _$XDG_DATA_HOME_ is unset, it defaults to _$HOME/.local/share_.
-Hooks are executed with a single argument, the new state (`online` or `offline`).
+Hooks are executed in lexicographic order with a single argument, the new state (`online` or `offline`).
+If _$RUNTIME_DIRECTORY_ is set, it will be used as working directory when running scripts.
 
 == Sample hooks
 
 === Notifications
+
+Basic script:
 
 [source,bash]
 ----
 notify-send -a netstate "Network state: $1"
 ----
 
-=== Waybar module update
+Fancier example, reusing the same notification:
 
 [source,bash]
 ----
-pkill # TODO...
+# Notification ID path, used to reuse notifications.
+nid_path=notify_id
+
+main() { # STATE
+	local state="${1:-}" args
+	case "$state" in
+		online) args=(Connected) ;;
+		offline) args=(-u critical Disconnected 'Lost network connection.') ;;
+		*) fail "unexpected state: $state" ;;
+	esac
+
+	local nid=0
+	if [[ -e $nid_path ]]; then
+		nid="$(cat "$nid_path")"
+	fi
+	if command -v notify-send >/dev/null; then
+		notify-send -a netstate -t 7500 -r "$nid" -p "${args[@]}" >"$nid_path"
+	fi
+}
+
+fail() { # MSG
+	printf 'error: %s\n' "$1" >&2 && exit 1
+}
+
+main "$@"
 ----
 
+=== Waybar module update
+
+Custom modules with a signal defined can be reloaded via a hook.
+For example, assuming signal 8:
+
+[source,bash]
+----
+pkill -RTMIN+8 waybar
+----
 
 
 == See also

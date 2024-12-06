@@ -1,6 +1,7 @@
 use anyhow::Result;
 use clap::{Parser, Subcommand};
 use is_executable::IsExecutable;
+use std::env;
 use std::path::PathBuf;
 use std::process;
 use zbus::blocking::Connection;
@@ -62,15 +63,16 @@ impl Watcher<'_> {
     }
 
     fn watch(&self) -> ! {
+        // TODO: Use logging library.
         println!("Watching for online state changes...");
         let mut online_state_stream = self.0.receive_online_state_changed();
         while let Some(msg) = online_state_stream.next() {
             let state = msg.get().expect("Unparseable state");
+            println!("Running hooks with state {}.", state);
             let hooks = Hook::find_all().expect("Unloadable hooks");
             let args = vec![state.as_str()];
             for hook in hooks {
                 match hook.execute(&args) {
-                    // TODO: Use logging library.
                     Ok(status) => {
                         if status.success() {
                             println!("{:?} succeeded.", hook)
@@ -110,7 +112,10 @@ impl Hook {
     }
 
     fn execute(&self, args: &Vec<&str>) -> Result<process::ExitStatus> {
-        let mut child = process::Command::new(&self.0).args(args).spawn()?;
-        Ok(child.wait()?)
+        let mut child = process::Command::new(&self.0);
+        if let Ok(dir) = env::var("RUNTIME_DIRECTORY") {
+            child.current_dir(dir);
+        }
+        Ok(child.args(args).spawn()?.wait()?)
     }
 }
