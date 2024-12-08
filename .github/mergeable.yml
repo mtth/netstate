@@ -1,0 +1,9 @@
+version: 2
+mergeable:
+  - when: pull_request.*
+    name: PR title check
+    validate:
+      - do: title
+        must_include:
+          regex: '/(?<type>build|chore|deps|docs|feat|fix|perf|refactor|style|test)(?<scope>(?:\([^()\r\n]*\)))?(?<breaking>!)?: .+$'
+          regex_flag: none
