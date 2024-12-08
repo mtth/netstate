@@ -2,7 +2,6 @@ use anyhow::Result;
 use clap::Parser;
 use netstate::config::{Commands, Config};
 
-
 fn main() -> Result<()> {
     let cfg = Config::parse();
     match cfg.command {
