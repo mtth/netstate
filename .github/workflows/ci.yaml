@@ -34,8 +34,9 @@ jobs:
           version: 2.0.18
       - name: Generate man page
         run: |
+          curl https://mtth.github.io/d/asciidoctor.css \
+            -o docs/asciidoctor.css
           mkdir dist
-          curl https://mtth.github.io/d/asciidoctor.css -O
           asciidoctor -b html docs/netstate.adoc \
             -a stylesheet=asciidoctor.css \
             -o dist/index.html
