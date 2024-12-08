@@ -35,7 +35,10 @@ jobs:
       - name: Generate man page
         run: |
           mkdir dist
-          asciidoctor -b html docs/netstate.adoc -o dist/index.html
+          curl https://mtth.github.io/d/asciidoctor.css -O
+          asciidoctor -b html docs/netstate.adoc \
+            -a stylesheet=asciidoctor.css \
+            -o dist/index.html
       - name: Upload as artifact
         uses: actions/upload-pages-artifact@v3
         with:
