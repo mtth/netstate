@@ -6,5 +6,7 @@ edition = "2021"
 anyhow = "1.0.94"
 clap = { version = "4.5.22", features = ["derive"] }
 is_executable = "1.0.4"
+tracing = "0.1.41"
+tracing-subscriber = "0.3.19"
 xdg = "2.5.2"
 zbus = "5.1.1"

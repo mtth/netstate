@@ -29,24 +29,23 @@ impl Watcher<'_> {
     }
 
     fn watch(&self) -> ! {
-        // TODO: Use logging library.
-        println!("Watching for online state changes...");
+        tracing::info!("Watching for state changes...");
         let mut online_state_stream = self.0.receive_online_state_changed();
         while let Some(msg) = online_state_stream.next() {
             let state = msg.get().expect("Unparseable state");
-            println!("Running hooks with state {}.", state);
+            tracing::info!("Running hooks with state {}.", state);
             let hooks = Hook::find_all().expect("Unloadable hooks");
             let args = vec![state.as_str()];
             for hook in hooks {
                 match hook.execute(&args) {
                     Ok(status) => {
                         if status.success() {
-                            println!("{:?} succeeded.", hook)
+                            tracing::info!("{:?} succeeded.", hook)
                         } else {
-                            println!("{:?} failed with status {:?}.", hook, status)
+                            tracing::warn!("{:?} failed with status {:?}.", hook, status)
                         }
                     }
-                    Err(err) => println!("{:?} errored: {}", hook, err),
+                    Err(err) => tracing::error!("{:?} errored: {}", hook, err),
                 }
             }
         }
@@ -74,6 +73,7 @@ impl Hook {
             })
             .collect();
         hooks.sort();
+        tracing::debug!("Found {} hook(s).", hooks.len());
         Ok(hooks)
     }
 
