@@ -18,3 +18,39 @@ jobs:
         uses: actions-rust-lang/rustfmt@v1
       - name: Test
         run: cargo test --all-features
+  build-pages:
+    name: Build GitHub Pages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.3
+      - name: Set up AsciiDoctor
+        uses: reitzig/actions-asciidoctor@v2.0.2
+        with:
+          version: 2.0.18
+      - name: Generate man page
+        run: |
+          mkdir dist
+          asciidoctor -b html docs/netstate.adoc -o dist/index.html
+      - name: Upload as artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/
+  deploy-pages:
+    name: Deploy GitHub Pages
+    runs-on: ubuntu-latest
+    needs: build-pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    permissions:
+      id-token: write
+      pages: write
+    steps:
+      - name: Deploy
+        id: deploy
+        uses: actions/deploy-pages@v4
