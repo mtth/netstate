@@ -5,5 +5,6 @@ mergeable:
     validate:
       - do: title
         must_include:
-          regex: '/(?<type>build|chore|deps|docs|feat|fix|perf|refactor|style|test)(?<scope>(?:\([^()\r\n]*\)))?(?<breaking>!)?: .+$'
+          regex: '^(?<type>build|chore|deps|docs|feat|fix|perf|refactor|style|test)(?<scope>(?:\([^()\r\n]*\)))?(?<breaking>!)?: .+$'
           regex_flag: none
+          message: Title should follow conventional commit conventions (https://www.conventionalcommits.org)
