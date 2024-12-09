@@ -10,7 +10,7 @@ v{manversion}
 
 == Name
 
-netstate - run hooks automatically on network state changes for systems using systemd-networkd
+netstate - run hooks on changes to network state for systems using systemd-networkd
 
 
 == Synopsis
@@ -23,7 +23,7 @@ netstate - run hooks automatically on network state changes for systems using sy
 == Description
 
 *netstate* runs in the background, executing hooks when network connectivity state changes (goes online or offline).
-It is designed to be set up once, for example as a _systemd.service(5)_.
+It is designed to be set up once, for example as a user _systemd.service(5)_.
 
 
 == Commands
@@ -33,10 +33,10 @@ Prints the current network state (`online` or `offline`).
 
 *watch*::
 Runs the *netstate* service and executes hooks on network connectivity state change.
-Hooks are executable files in _$XDG_DATA_HOME/netstate/hooks.d_.
-If _$XDG_DATA_HOME_ is unset, it defaults to _$HOME/.local/share_.
+Hooks are executable files in `$XDG_DATA_HOME/netstate/hooks.d`.
+If `$XDG_DATA_HOME` is unset, it defaults to `$HOME/.local/share`.
 Hooks are executed in lexicographic order with a single argument, the new state (`online` or `offline`).
-If _$RUNTIME_DIRECTORY_ is set, it will be used as working directory when running scripts.
+If `$RUNTIME_DIRECTORY` is set, it will be used as working directory when running scripts.
 
 == Sample hooks
 
@@ -94,3 +94,5 @@ pkill -RTMIN+8 waybar
 == See also
 
 _darkman(1)_
+_networkd-dispatcher(8)_
+_systemd-networkd(8)_
