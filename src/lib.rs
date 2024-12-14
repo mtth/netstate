@@ -29,6 +29,7 @@ impl Client<'_> {
     /// Creates a client pointing to the system D-Bus instance.
     fn system<'a>() -> Result<Client<'a>> {
         let connection = Connection::system()?;
+        tracing::debug!("Created D-Bus connection");
         let proxy = manager::ManagerProxy::new(&connection)?;
         Ok(Client(proxy))
     }
