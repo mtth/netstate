@@ -11,30 +11,39 @@ mod manager;
 const PKG_NAME: &str = env!("CARGO_PKG_NAME");
 
 pub fn query_state() -> Result<()> {
-    todo!("Query subcommand will be available soon");
+    let client = Client::system()?;
+    let state = client.query()?;
+    println!("{}", state);
+    Ok(())
 }
 
 pub fn watch_state() -> Result<()> {
-    let watcher = Watcher::system()?;
-    watcher.watch()
+    let client = Client::system()?;
+    client.watch()
 }
 
-struct Watcher<'a>(manager::ManagerProxy<'a>);
+/// D-Bus client.
+struct Client<'a>(manager::ManagerProxy<'a>);
 
-impl Watcher<'_> {
-    fn system<'a>() -> Result<Watcher<'a>> {
+impl Client<'_> {
+    /// Creates a client pointing to the system D-Bus instance.
+    fn system<'a>() -> Result<Client<'a>> {
         let connection = Connection::system()?;
         let proxy = manager::ManagerProxy::new(&connection)?;
-        Ok(Watcher(proxy))
+        Ok(Client(proxy))
+    }
+
+    fn query(&self) -> Result<String> {
+        Ok(self.0.online_state()?)
     }
 
     fn watch(&self) -> ! {
         tracing::info!("Watching for state changes...");
         let mut online_state_stream = self.0.receive_online_state_changed();
         while let Some(msg) = online_state_stream.next() {
-            let state = msg.get().expect("Unparseable state");
+            let state = msg.get().expect("State should be parseable");
             tracing::info!("Running hooks with state {}.", state);
-            let hooks = Hook::find_all().expect("Unloadable hooks");
+            let hooks = Hook::find_all().expect("Hooks should exist");
             let args = vec![state.as_str()];
             for hook in hooks {
                 match hook.execute(&args) {
@@ -50,7 +59,7 @@ impl Watcher<'_> {
             }
         }
         // TODO: Gracefully exit on signal.
-        unreachable!("Watcher ended unexpectedly");
+        unreachable!("Client watch ended unexpectedly");
     }
 }
 
